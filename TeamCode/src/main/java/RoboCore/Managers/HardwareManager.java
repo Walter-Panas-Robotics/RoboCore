@@ -2,10 +2,13 @@ package RoboCore.Managers;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.DeprecatedSystem.OldRobot;
+import java.util.List;
 
-public class HardwareManager {
-    static HardwareMap hardwareMap = OldRobot.hardwareMap;
+import RoboCore.RoboCore;
+import RoboCore.Robot;
+
+public class HardwareManager extends RoboCore {
+    static HardwareMap hardwareMap = Robot.hardwareMap;
 
     public static <T> T getHardwareDevice(Class<? extends T> deviceClass, String deviceName) throws RuntimeException {
         T device;
@@ -15,5 +18,9 @@ public class HardwareManager {
             throw new RuntimeException("Error getting hardware device: " + deviceName, e);
         }
         return device;
+    }
+
+    public static <T> List<T> findHardwareDeviceByClass(Class<? extends T> deviceClass) {
+        return hardwareMap.getAll(deviceClass);
     }
 }

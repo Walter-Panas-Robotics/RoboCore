@@ -69,6 +69,11 @@ public class CommandArchitechture extends RoboCore {
                 case UPDATE:
                     this.type = CommandType.UPDATE;
                     break;
+                case ACTION:
+                    this.type = CommandType.ACTION;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid command type: " + type);
             }
             return this;
         }

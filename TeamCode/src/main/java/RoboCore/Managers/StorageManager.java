@@ -1,30 +1,25 @@
-package RoboCore.Managers.Storage;
-
-import org.firstinspires.ftc.teamcode.DeprecatedSystem.OldRobot;
+package RoboCore.Managers;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
 import RoboCore.Config.StorageManagerConfig;
+import RoboCore.Robot;
+import RoboCore.RoboCore;
 
-public class StorageManager {
-    private final OldRobot robot;
-
-    public StorageManager(OldRobot robot) {
-        this.robot = robot;
-    }
+public class StorageManager extends RoboCore {
 
     /**
      * Checks if the controller has been initialized.
      *
-     * @see OldRobot
+     * @see Robot
      */
-    private void checkInitialized() throws RuntimeException {
-        if (!robot.initialized) {
-            System.out.println("[NATO | PersistentStorageController - Error]: Not initialized.");
-            throw new RuntimeException("[NATO | PersistentStorageController - Error]: Not initialized.");
-        }
+    private static void checkInitialized() throws RuntimeException {
+//        if (!robot.initialized) {
+//            System.out.println("[NATO | PersistentStorageController - Error]: Not initialized.");
+//            throw new RuntimeException("[NATO | PersistentStorageController - Error]: Not initialized.");
+//        }
     }
 
     /**
@@ -34,7 +29,7 @@ public class StorageManager {
      * @return the adjusted path of the file
      * @see StorageManager
      */
-    private String adjustPath(String fileName) {
+    private static String adjustPath(String fileName) {
         checkInitialized();
         if (!fileName.startsWith(StorageManagerConfig.preferredPath)) {
             fileName = StorageManagerConfig.preferredPath + fileName;
@@ -50,7 +45,7 @@ public class StorageManager {
      *
      * @param fileName the name of the file to create
      **/
-    public boolean createFile(String fileName) {
+    public static boolean createFile(String fileName) {
         checkInitialized();
         boolean result = false;
         String adjustedFileName = adjustPath(fileName);
@@ -58,7 +53,7 @@ public class StorageManager {
             File writeFile = new File(adjustedFileName);
             result = writeFile.createNewFile();
         } catch (IOException e) {
-            robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
+            Robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
         }
         return result;
     }
@@ -79,7 +74,7 @@ public class StorageManager {
                 result = writeToFile(adjustedFileName, content);
             }
         } catch (IOException e) {
-            robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
+            Robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
         }
         return result;
     }
@@ -101,7 +96,7 @@ public class StorageManager {
             writer.close();
             result = true;
         } catch (IOException e) {
-            robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
+            Robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
         }
         return result;
     }

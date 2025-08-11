@@ -1,11 +1,10 @@
-package RoboCore.Managers.Gamepads;
+package RoboCore.Managers;
 
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import RoboCore.Managers.CommandArchitechture;
 import RoboCore.RoboCore;
 import RoboCore.Robot;
 

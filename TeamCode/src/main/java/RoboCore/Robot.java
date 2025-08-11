@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -18,23 +19,27 @@ import java.util.Map;
 import RoboCore.Exceptions.MotorNotFound;
 import RoboCore.Managers.CommandArchitechture;
 import RoboCore.Managers.CommandArchitechture.Command;
-import RoboCore.Managers.Gamepads.GamepadManager;
+import RoboCore.Managers.GamepadManager;
+import RoboCore.Managers.IMUManager;
+import RoboCore.Managers.TelemetryManager;
 
 public class Robot extends RoboCore {
-
     private static final GamepadManager gamepadManager = GamepadManager.getInstance();
     private static final Map<String, DcMotorEx> motors = new HashMap<>();
     private static final Map<MotorLocation, DcMotorEx> internal_motors = new HashMap<>();
-    public static Telemetry telemetry;
-    public static HardwareMap hardwareMap;
 
+    public static Telemetry telemetry;
+    public static TelemetryManager telemetryManager;
+    public static HardwareMap hardwareMap;
+    public static IMUManager imuManager;
     public static Map<String, HardwareDevice> hardware_devices = new HashMap<>();
+    public static IMU imu;
     private static volatile Robot instance; // Made volatile for thread safety if buildInstance is synchronized
     private static double lastUpdateTime;
+    private static OpMode opMode; // Should be initialized by the builder
+    private static Method driveMethod;
     private static double wheelDiameter;
 
-    private static Method driveMethod;
-    private static OpMode opMode; // Should be initialized by the builder
 
     private Robot(Builder builder) {
         opMode = builder.opMode;
@@ -42,6 +47,8 @@ public class Robot extends RoboCore {
         Robot.hardwareMap = opMode.hardwareMap;
         wheelDiameter = builder.wheelDiameter;
         driveMethod = builder.driveMethod;
+        Robot.telemetryManager = new TelemetryManager(opMode.telemetry, true);
+
     }
 
     public static OpMode getOpMode() {
@@ -93,7 +100,7 @@ public class Robot extends RoboCore {
             }
         }
 
-        opMode.updateTelemetry(telemetry);
+        telemetry.update();
     }
 
     public static int tick() {
@@ -136,8 +143,6 @@ public class Robot extends RoboCore {
         private final OpMode opMode;
 
         double wheelDiameter;
-
-        MeasurementUnit wheelDiameterUnit;
 
         Method driveMethod;
 
@@ -188,8 +193,15 @@ public class Robot extends RoboCore {
             return this;
         }
 
+        public Builder addIMU(IMU.Parameters parameters) {
+            imuManager = IMUManager.getInstance(parameters);
+            imu = imuManager.getIMU();
+            return this;
+        }
+
 
         public Robot build() {
+
             if (!exists(driveMethod)) {
                 try {
                     driveMethod = this.opMode.getClass().getMethod("drive", DcMotorEx.class, DcMotorEx.class, DcMotorEx.class, DcMotorEx.class);
@@ -197,8 +209,8 @@ public class Robot extends RoboCore {
                     throw new RuntimeException("Error adding drivetrain: " + this.opMode.getClass().getName(), e);
                 }
             }
-
             return Robot.buildInstance(this);
+
         }
     }
 }

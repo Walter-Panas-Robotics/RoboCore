@@ -1,5 +1,6 @@
 package RoboCore.Managers;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -18,7 +19,7 @@ public class AprilTagController {
     private static final VisionPortal visionPortal = new VisionPortal.Builder()
             .addProcessor(aprilTagProcessor)
             .enableLiveView(true)
-            .setCamera()
+            .setCamera(HardwareManager.findHardwareDeviceByClass(WebcamName.class).get(0))
             .build();
     private static AprilTagController instance;
 
@@ -36,7 +37,6 @@ public class AprilTagController {
     }
 
     public List<AprilTagDetection> update() {
-        List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
-
+        return aprilTagProcessor.getDetections();
     }
 }
