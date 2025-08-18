@@ -27,6 +27,10 @@ public class RoboCore {
         }
     }
 
+    public static boolean exists(Object x) {
+        return x != null;
+    }
+
     /**
      * The enum Holonomic motor locations.
      */
@@ -61,4 +65,19 @@ public class RoboCore {
          * Centimeter measurement unit.
          */
         CM}
+
+    public enum CommandPriority {
+        HIGHEST,
+        HIGH,
+        MEDIUM,
+        LOW,
+        EXPENDABLE
+    }
+
+    public enum TriggerType {
+        ON_PRESS,
+        ON_RELEASE,
+        ON_HOLD,
+        SWITCH
+    }
 }

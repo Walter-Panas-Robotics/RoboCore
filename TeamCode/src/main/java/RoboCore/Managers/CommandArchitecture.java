@@ -8,19 +8,19 @@ import java.util.List;
 
 import RoboCore.RoboCore;
 
-public class CommandArchitechture extends RoboCore {
+public class CommandArchitecture extends RoboCore {
 
     public static List<Command> update_commands = new ArrayList<>();
-    private static volatile CommandArchitechture instance;
+    private static volatile CommandArchitecture instance;
     private static String name;
 
-    private CommandArchitechture() {
+    private CommandArchitecture() {
 
     }
 
-    public synchronized static CommandArchitechture getInstance() {
+    public synchronized static CommandArchitecture getInstance() {
         if (instance == null) {
-            instance = new CommandArchitechture();
+            instance = new CommandArchitecture();
         }
         return instance;
     }

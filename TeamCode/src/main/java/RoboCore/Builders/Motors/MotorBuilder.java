@@ -7,8 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import RoboCore.Config.DcMotorConfig;
 import RoboCore.Controllers.PIDFController;
 import RoboCore.Managers.HardwareManager;
+import RoboCore.Robot;
 
-public class MotorBuilder {
+public class MotorBuilder extends Robot {
 
     private final String hardwareName;
     private String customName;

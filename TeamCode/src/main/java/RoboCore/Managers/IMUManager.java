@@ -18,7 +18,7 @@ public class IMUManager extends RoboCore {
     public static float Z;
 
     private IMUManager(IMU.Parameters parameters) {
-        new CommandArchitechture.Builder(this.getClass()).name("IMUManager").type(RoboCore.CommandType.UPDATE).attachMethod("update").build();
+        new CommandArchitecture.Builder(this.getClass()).name("IMUManager").type(RoboCore.CommandType.UPDATE).attachMethod("update").build();
 
         imu = HardwareManager.findHardwareDeviceByClass(IMU.class).get(0);
         imu.initialize(parameters);
