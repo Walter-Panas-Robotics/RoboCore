@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class MotorLogExporter {
-    private List<String> logs = new ArrayList<>();
+    private final List<String> logs = new ArrayList<>();
 
     public void log(MotorTelemetry telemetry, float[] pidf) {
         logs.add(String.format(Locale.US,

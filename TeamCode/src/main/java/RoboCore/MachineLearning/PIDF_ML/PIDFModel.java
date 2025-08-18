@@ -3,10 +3,10 @@ package RoboCore.MachineLearning.PIDF_ML;
 import java.io.Serializable;
 
 public class PIDFModel implements Serializable {
-    private float[][] w1 = new float[6][8];
-    private float[] b1 = new float[8];
-    private float[][] w2 = new float[8][4];
-    private float[] b2 = new float[4];
+    private final float[][] w1 = new float[6][8];
+    private final float[] b1 = new float[8];
+    private final float[][] w2 = new float[8][4];
+    private final float[] b2 = new float[4];
 
     public float[] predict(float[] input) {
         float[] h1 = relu(matMul(input, w1, b1));

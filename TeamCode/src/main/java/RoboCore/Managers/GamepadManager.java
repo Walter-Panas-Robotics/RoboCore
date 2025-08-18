@@ -3,6 +3,9 @@ package RoboCore.Managers;
 
 import androidx.annotation.Nullable;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Gamepad;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,18 +17,24 @@ public class GamepadManager extends RoboCore {
 
     private static final List<GamepadCommandEntry> gamepad_commands = new ArrayList<>();
     private static GamepadManager instance;
+    public static Gamepad gamepad1;
+    public static Gamepad gamepad2;
 
-    private GamepadManager() {
+    private GamepadManager(OpMode opMode) {
         new CommandArchitecture.Builder(this.getClass())
                 .name("GamepadManager:Updater")
                 .type(CommandType.UPDATE)
                 .attachMethod("update")
                 .build();
+
+        gamepad1 = opMode.gamepad1;
+        gamepad2 = opMode.gamepad2;
     }
 
-    public static GamepadManager getInstance() {
+    public static GamepadManager getInstance(@Nullable OpMode opMode) {
         if (instance == null) {
-            instance = new GamepadManager();
+            assert opMode != null;
+            instance = new GamepadManager(opMode);
         }
         return instance;
     }

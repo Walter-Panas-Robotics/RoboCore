@@ -130,7 +130,7 @@ public class TelemetryManager {
         if (loggingEnabled && fileWriter != null && logTimer.seconds() >= logIntervalSeconds) {
             if (currentDataLine.length() > 0) {
                 currentDataLine.deleteCharAt(currentDataLine.length() - 1); // Remove last comma
-                logLine.append(currentDataLine.toString()).append("\n");
+                logLine.append(currentDataLine).append("\n");
             }
 
             try {

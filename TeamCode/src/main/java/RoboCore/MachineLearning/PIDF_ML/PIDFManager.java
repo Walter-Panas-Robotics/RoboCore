@@ -3,8 +3,8 @@ package RoboCore.MachineLearning.PIDF_ML;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class PIDFManager {
-    private DcMotorEx motor;
-    private PIDFModel model;
+    private final DcMotorEx motor;
+    private final PIDFModel model;
 
     public PIDFManager(DcMotorEx motor, PIDFModel model) {
         this.motor = motor;

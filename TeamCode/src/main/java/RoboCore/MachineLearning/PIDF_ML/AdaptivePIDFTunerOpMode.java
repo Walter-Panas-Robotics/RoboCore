@@ -17,7 +17,7 @@ public class AdaptivePIDFTunerOpMode extends LinearOpMode {
     private PIDFReinforcementAgent agent;
     private ScenarioHandler scenario;
     private MotorLogExporter logger;
-    private Map<String, DcMotorEx> motors = new HashMap<>();
+    private final Map<String, DcMotorEx> motors = new HashMap<>();
 
     @Override
     public void runOpMode() {

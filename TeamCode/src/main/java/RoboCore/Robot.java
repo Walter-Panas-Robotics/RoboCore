@@ -22,7 +22,7 @@ import RoboCore.Managers.IMUManager;
 import RoboCore.Managers.TelemetryManager;
 
 public class Robot extends RoboCore {
-    private static final GamepadManager gamepadManager = GamepadManager.getInstance();
+    public static double maxSpeed = 100;
     public static final Map<String, HardwareDevice> hardware_devices = new HashMap<>();
     private static final Map<String, DcMotorEx> motors = new HashMap<>();
     private static final Map<MotorLocation, DcMotorEx> internal_motors = new HashMap<>();
@@ -31,9 +31,12 @@ public class Robot extends RoboCore {
     public static IMUManager imuManager;
     private final Method driveMethod;
     private final double wheelDiameter;
+    public static double controllerDeadzone = .1;
+    public static boolean useFieldCentric = false;
+    private static GamepadManager gamepadManager;
     public Telemetry telemetry;
     private static volatile Robot instance; // Made volatile for thread safety if buildInstance is synchronized
-    private static double lastUpdateTime;
+    private static double lastUpdateTime = 0;
     public TelemetryManager telemetryManager;
     public HardwareMap hardwareMap;
     public IMU imu;
@@ -46,6 +49,12 @@ public class Robot extends RoboCore {
         wheelDiameter = builder.wheelDiameter;
         driveMethod = builder.driveMethod;
         this.telemetryManager = new TelemetryManager(opMode.telemetry, true);
+        this.imu = builder.imu;
+        maxSpeed = builder.maxSpeed;
+        controllerDeadzone = builder.controllerDeadzone;
+        useFieldCentric = builder.useFieldCentric;
+
+        gamepadManager = GamepadManager.getInstance(this.opMode);
 
     }
 
@@ -150,6 +159,9 @@ public class Robot extends RoboCore {
         double wheelDiameter;
         Method driveMethod;
         private IMU imu;
+        private double maxSpeed;
+        private double controllerDeadzone;
+        private boolean useFieldCentric;
 
         public Builder(@NonNull OpMode opMode) {
             Robot.setHold_lock(true);
@@ -204,6 +216,21 @@ public class Robot extends RoboCore {
             return this;
         }
 
+        public Builder setMaxSpeed(double maxSpeed) {
+            this.maxSpeed = maxSpeed;
+            return this;
+        }
+
+        public Builder setControllerDeadzone(double deadzone) {
+            this.controllerDeadzone = deadzone;
+            return this;
+        }
+
+        public Builder useFieldCentric(boolean useFieldCentric) {
+            this.useFieldCentric = useFieldCentric;
+            return this;
+        }
+
 
         public Robot build() {
 
@@ -214,6 +241,7 @@ public class Robot extends RoboCore {
                     throw new RuntimeException("Error adding drivetrain: " + this.opMode.getClass().getName(), e);
                 }
             }
+
             return Robot.buildInstance(this);
 
         }

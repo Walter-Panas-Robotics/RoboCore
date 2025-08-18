@@ -1,8 +1,8 @@
 package RoboCore.MachineLearning.PIDF_ML;
 
 public class OnlineTrainer {
-    private PIDFModel model;
-    private float baseLearningRate = 0.001f;
+    private final PIDFModel model;
+    private final float baseLearningRate = 0.001f;
 
     public OnlineTrainer(PIDFModel model) {
         this.model = model;
