@@ -1,5 +1,6 @@
 package RoboCore.Builders.Sensors;
 
+@SuppressWarnings("unused")
 public class SensorBuilder {
     public static class ColorSensorBuilder {
     }

@@ -1,5 +1,8 @@
 package RoboCore;
 
+import static RoboCore.Config.RoboCore.author;
+import static RoboCore.Config.RoboCore.version;
+
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -10,65 +13,60 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import RoboCore.Drivetrains.Drivetrain;
+import RoboCore.Exceptions.DrivetrainNotFound;
 import RoboCore.Exceptions.MotorNotFound;
 import RoboCore.Managers.CommandArchitecture;
 import RoboCore.Managers.CommandArchitecture.Command;
 import RoboCore.Managers.GamepadManager;
 import RoboCore.Managers.IMUManager;
-import RoboCore.Managers.TelemetryManager;
+import lombok.Getter;
 
+@SuppressWarnings("unused")
+@Getter
 public class Robot extends RoboCore {
-    public static double maxSpeed = 100;
-    public static final Map<String, HardwareDevice> hardware_devices = new HashMap<>();
-    private static final Map<String, DcMotorEx> motors = new HashMap<>();
-    private static final Map<MotorLocation, DcMotorEx> internal_motors = new HashMap<>();
-    private static volatile boolean hold_lock = false;
-    private final OpMode opMode; // Should be initialized by the builder
-    public static IMUManager imuManager;
-    private final Method driveMethod;
-    private final double wheelDiameter;
-    public static double controllerDeadzone = .1;
-    public static boolean useFieldCentric = false;
-    private static GamepadManager gamepadManager;
-    public Telemetry telemetry;
-    private static volatile Robot instance; // Made volatile for thread safety if buildInstance is synchronized
+    private static volatile Robot instance;
     private static double lastUpdateTime = 0;
-    public TelemetryManager telemetryManager;
-    public HardwareMap hardwareMap;
-    public IMU imu;
-
+    private final Map<String, HardwareDevice> hardwareDevices = new HashMap<>();
+    private final Map<String, DcMotorEx> motors = new HashMap<>();
+    private final Map<MotorLocation, DcMotorEx> internalMotors = new HashMap<>();
+    private final double maxSpeed;
+    private final double controllerDeadzone;
+    private final boolean fieldCentric;
+    private final double wheelDiameter;
+    private final IMUManager imuManager;
+    private final GamepadManager gamepadManager;
+    private final Drivetrain drivetrain;
+    private final OpMode opMode;
+    private final HardwareMap hardwareMap;
+    private final Telemetry telemetry;
+    private final IMU imu;
 
     private Robot(Builder builder) {
-        opMode = builder.opMode;
+        this.opMode = builder.opMode;
         this.telemetry = opMode.telemetry;
         this.hardwareMap = opMode.hardwareMap;
-        wheelDiameter = builder.wheelDiameter;
-        driveMethod = builder.driveMethod;
-        this.telemetryManager = new TelemetryManager(opMode.telemetry, true);
+        this.wheelDiameter = builder.wheelDiameter;
+        this.drivetrain = builder.drivetrain;
+        this.imuManager = builder.imuManager;
         this.imu = builder.imu;
-        maxSpeed = builder.maxSpeed;
-        controllerDeadzone = builder.controllerDeadzone;
-        useFieldCentric = builder.useFieldCentric;
+        this.maxSpeed = builder.maxSpeed;
+        this.controllerDeadzone = builder.controllerDeadzone;
+        this.fieldCentric = builder.useFieldCentric;
+        this.gamepadManager = GamepadManager.getInstance(this.opMode);
 
-        gamepadManager = GamepadManager.getInstance(this.opMode);
+        this.internalMotors.putAll(builder.internalMotors);
+        this.hardwareDevices.putAll(builder.hardwareDevices);
 
+        drivetrain.init(this);
     }
 
-    public static boolean isHold_lock() {
-        return hold_lock;
-    }
-
-    public static void setHold_lock(boolean hold_lock) {
-        Robot.hold_lock = hold_lock;
-    }
-
-    private static synchronized Robot buildInstance(Builder builder) {
-        if (instance == null && !hold_lock) {
-            if (builder == null) { // Ensure builder is provided for first initialization
+    public static synchronized Robot buildInstance(Builder builder) {
+        if (instance == null) {
+            if (builder == null) {
                 throw new IllegalStateException("Robot.Builder cannot be null for initial instantiation.");
             }
             instance = new Robot(builder);
@@ -76,143 +74,93 @@ public class Robot extends RoboCore {
         return instance;
     }
 
-    public static Method getMethodFromName(Class<?> specifiedClass, String name) {
-        try {
-            return specifiedClass.getDeclaredMethod(name);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Error getting method: " + name, e);
-        }
-    }
-
-    public static synchronized Robot getInstance() {
+    public static Robot getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Robot instance has not been initialized. Call build() on a Robot.Builder first.");
         }
         return instance;
     }
 
-    public final OpMode getOpMode() {
-        return opMode;
-    }
-
     public void update() {
-
-        try {
-            driveMethod.invoke(opMode, motors.get("frontLeft"), motors.get("backLeft"), motors.get("frontRight"), motors.get("backRight"));
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating drivetrain", e);
-        }
-
+        drivetrain.drive(this, internalMotors);
         if (CommandArchitecture.update_commands != null) {
             for (Command command : CommandArchitecture.update_commands) {
                 if (command.type == CommandType.UPDATE) {
                     try {
                         command.method.invoke(command.builder);
                     } catch (Exception e) {
-                        throw new RuntimeException("Error updating command: " + command.name, e);
+                        telemetry.addLine("Error updating command: " + command.name);
                     }
                 }
             }
         }
-
-        telemetryManager.update();
-
+        telemetry.update();
     }
 
-    public final int tick() {
+    @SuppressWarnings("UnusedReturnValue")
+    public int tick() {
         update();
-        long currentTime = System.currentTimeMillis(); // Use long for time
+        long currentTime = System.currentTimeMillis();
         int delta = (int) (currentTime - lastUpdateTime);
         lastUpdateTime = currentTime;
         return Math.max(delta, 0);
     }
 
-    public final DcMotorEx getMotor(String name) throws MotorNotFound {
-        HardwareDevice device = hardware_devices.get(name);
-
-        if (device == null) {
-            throw new MotorNotFound("Motor not found: " + name);
-//            throw new RuntimeException("Device not found: " + name);
+    public DcMotorEx getMotor(String name) throws MotorNotFound {
+        HardwareDevice device = hardwareDevices.get(name);
+        if (!(device instanceof DcMotorEx)) {
+            throw new MotorNotFound("Motor not found or invalid: " + name);
         }
-
-        try {
-            if (device instanceof DcMotorEx) {
-                motors.put(name, (DcMotorEx) device);
-                return (DcMotorEx) device;
-            }
-        } catch (ClassCastException e) {
-            throw new RuntimeException("Device is not a DcMotorEx: " + name, e);
-        }
-        telemetryManager.addLine("Error while getting device: " + name);
-
-        throw new MotorNotFound("Error whilst retrieving device: " + name);
-    }
-
-    public final Map<String, DcMotorEx> getMotors() {
-        return motors;
+        DcMotorEx motor = (DcMotorEx) device;
+        motors.put(name, motor);
+        return motor;
     }
 
     public static class Builder {
-
         @NonNull
         private final OpMode opMode;
-        double wheelDiameter;
-        Method driveMethod;
+        @NonNull
+        private final Drivetrain drivetrain;
+        private final Map<MotorLocation, DcMotorEx> internalMotors = new HashMap<>();
+        private final Map<String, HardwareDevice> hardwareDevices = new HashMap<>();
+        private double wheelDiameter;
         private IMU imu;
-        private double maxSpeed;
-        private double controllerDeadzone;
-        private boolean useFieldCentric;
+        private IMUManager imuManager;
+        private double maxSpeed = 100;
+        private double controllerDeadzone = 0.1;
+        private boolean useFieldCentric = false;
 
         public Builder(@NonNull OpMode opMode) {
-            Robot.setHold_lock(true);
+            if (!(opMode instanceof Drivetrain)) {
+                throw new DrivetrainNotFound("OpMode must implement Drivetrain interface.");
+            }
             this.opMode = opMode;
+            this.drivetrain = (Drivetrain) opMode;
 
+            opMode.telemetry.addLine("RoboCore Software \n " + "Version: " + version + "\n Created by: " + author);
+            opMode.telemetry.update();
         }
-
 
         public Builder addMotor(String customName, MotorLocation location, DcMotorEx motor) {
-            hardware_devices.put(customName, motor);
-            internal_motors.put(location, motor);
-
-            opMode.telemetry.addLine("Added motor: " + customName + " to static hardware_devices map.");
+            internalMotors.put(location, motor);
+            hardwareDevices.put(customName, motor);
+            opMode.telemetry.addLine("Added motor: " + customName);
             return this;
         }
 
-
-        @NonNull
-        public Builder addDrivetrain(Class<?> drivetrainClass) {
-            try {
-                this.driveMethod = drivetrainClass.getMethod("drive", DcMotorEx.class, DcMotorEx.class, DcMotorEx.class, DcMotorEx.class);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("Error adding drivetrain: " + drivetrainClass.getName(), e);
-            }
-            return this;
-        }
-
-
-        public Builder addArm() {
-            return this;
-        }
-
-
-        public Builder addIntake() {
-            return this;
-        }
-
-
-        public Builder setWheelDiameter(double diameter, MeasurementUnit unit) {
-            this.wheelDiameter = convertToMM(diameter, unit);
-            return this;
-        }
-
-        public Builder addGamepadCommand(boolean gamepad_button, String actionableMethod, TriggerType triggerType) {
-            GamepadManager.assignCommand(gamepad_button, actionableMethod, triggerType);
+        public Builder addMotor(MotorLocation location, DcMotorEx motor) {
+            internalMotors.put(location, motor);
             return this;
         }
 
         public Builder addIMU(IMU.Parameters parameters) {
             imuManager = IMUManager.getInstance(parameters);
             imu = imuManager.getIMU();
+            return this;
+        }
+
+        public Builder setWheelDiameter(double diameter, MeasurementUnit unit) {
+            this.wheelDiameter = convertToMM(diameter, unit);
             return this;
         }
 
@@ -231,19 +179,18 @@ public class Robot extends RoboCore {
             return this;
         }
 
+        public Builder addGamepadCommand(boolean button, String method, TriggerType triggerType) {
+            GamepadManager.assignCommand(button, method, triggerType);
+            return this;
+        }
+
+        public Builder addGamepadCommand(boolean button, String method) {
+            GamepadManager.assignCommand(button, method);
+            return this;
+        }
 
         public Robot build() {
-
-            if (!exists(driveMethod)) {
-                try {
-                    driveMethod = this.opMode.getClass().getMethod("drive", DcMotorEx.class, DcMotorEx.class, DcMotorEx.class, DcMotorEx.class);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException("Error adding drivetrain: " + this.opMode.getClass().getName(), e);
-                }
-            }
-
             return Robot.buildInstance(this);
-
         }
     }
 }

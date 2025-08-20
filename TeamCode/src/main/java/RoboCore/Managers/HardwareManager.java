@@ -30,6 +30,7 @@ public class HardwareManager extends RoboCore {
         return hardwareMap.getAll(deviceClass);
     }
 
+    @SuppressWarnings("unused")
     public static HardwareMap getInstance(HardwareMap hardwareMap) {
         if (instance == null) {
             instance = new HardwareManager();
