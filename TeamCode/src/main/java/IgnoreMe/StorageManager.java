@@ -1,14 +1,20 @@
-package RoboCore.Managers;
+package IgnoreMe;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
 import RoboCore.Config.StorageManagerConfig;
-import RoboCore.Robot;
 import RoboCore.RoboCore;
+import RoboCore.Robot;
 
+@SuppressWarnings({"unused", "deprecation", "CommentedOutCode"})
+@Deprecated
 public class StorageManager extends RoboCore {
+
+    private static final Telemetry telemetry = Robot.getInstance().getTelemetry();
 
     /**
      * Checks if the controller has been initialized.
@@ -20,6 +26,7 @@ public class StorageManager extends RoboCore {
 //            System.out.println("[NATO | PersistentStorageController - Error]: Not initialized.");
 //            throw new RuntimeException("[NATO | PersistentStorageController - Error]: Not initialized.");
 //        }
+        throw new RuntimeException("StorageManager: Cannot be used at this time.");
     }
 
     /**
@@ -53,7 +60,7 @@ public class StorageManager extends RoboCore {
             File writeFile = new File(adjustedFileName);
             result = writeFile.createNewFile();
         } catch (IOException e) {
-            Robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
+            telemetry.addLine("[PersistentStorageController - IOException]: " + e);
         }
         return result;
     }
@@ -74,7 +81,7 @@ public class StorageManager extends RoboCore {
                 result = writeToFile(adjustedFileName, content);
             }
         } catch (IOException e) {
-            Robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
+            telemetry.addLine("[PersistentStorageController - IOException]: " + e);
         }
         return result;
     }
@@ -96,7 +103,7 @@ public class StorageManager extends RoboCore {
             writer.close();
             result = true;
         } catch (IOException e) {
-            Robot.telemetry.addLine("[PersistentStorageController - IOException]: " + e);
+            telemetry.addLine("[PersistentStorageController - IOException]: " + e);
         }
         return result;
     }

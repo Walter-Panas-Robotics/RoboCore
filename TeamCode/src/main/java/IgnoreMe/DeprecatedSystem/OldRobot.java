@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DeprecatedSystem;
+package IgnoreMe.DeprecatedSystem;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.lang.reflect.Method;
 
-import RoboCore.Managers.StorageManager;
+import IgnoreMe.StorageManager;
 
 /**
  * Main way to interact with the robot.
@@ -17,6 +17,7 @@ import RoboCore.Managers.StorageManager;
  **/
 
 @Deprecated
+@SuppressWarnings("all")
 public class OldRobot<O extends OpMode> {
     public static Method driveFunction;
     public static HardwareMap hardwareMap;
@@ -32,7 +33,7 @@ public class OldRobot<O extends OpMode> {
         this.builder = builder;
         this.telemetry = builder.getTelemetry();
         hardwareMap = builder.getHardwareMap();
-        this.storageManager = new StorageManager(this);
+        this.storageManager = new StorageManager();
         this.opMode = builder.getOpMode();
         try {
             driveFunction = this.opMode.getMethod("drive");

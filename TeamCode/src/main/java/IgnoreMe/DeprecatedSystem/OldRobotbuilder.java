@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DeprecatedSystem;
+package IgnoreMe.DeprecatedSystem;
 
 import android.util.Pair;
 
@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import java.util.HashMap;
 
 @Deprecated
+@SuppressWarnings("all")
 public class OldRobotbuilder<O extends OpMode> {
     private final Telemetry telemetry;
     private final HardwareMap hardwareMap;

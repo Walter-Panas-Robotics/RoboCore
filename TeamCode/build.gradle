@@ -25,4 +25,5 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
+    implementation annotationProcessor('org.projectlombok:lombok:1.18.30')
 }

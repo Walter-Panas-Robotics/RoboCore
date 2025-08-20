@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import RoboCore.Config.DcMotorConfig;
-import RoboCore.Controllers.PIDFController;
 import RoboCore.Managers.HardwareManager;
 
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class MotorBuilder {
 
     private final String hardwareName;
@@ -15,7 +15,6 @@ public class MotorBuilder {
     private DcMotorSimple.Direction direction = DcMotorConfig.defaultDirection;
     private DcMotor.ZeroPowerBehavior zeroPowerBehavior = DcMotorConfig.defaultZeroPowerBehavior;
     private DcMotor.RunMode runMode = DcMotorConfig.defaultRunMode;
-    private PIDFController pidfController;
 
     public MotorBuilder(String hardwareName) {
         this.hardwareName = hardwareName;
@@ -39,12 +38,6 @@ public class MotorBuilder {
 
     public MotorBuilder runMode(DcMotor.RunMode runMode) {
         this.runMode = runMode;
-        return this;
-    }
-
-    @Deprecated
-    public MotorBuilder pidfController(PIDFController pidfController) {
-        this.pidfController = pidfController;
         return this;
     }
 

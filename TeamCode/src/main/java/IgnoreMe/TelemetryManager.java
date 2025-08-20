@@ -1,4 +1,4 @@
-package RoboCore.Managers; // Or your preferred package
+package IgnoreMe; // Or your preferred package
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -15,19 +15,23 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * @noinspection ResultOfMethodCallIgnored
+ */
+@Deprecated
+@SuppressWarnings("all")
 public class TelemetryManager {
 
+    public static final String TAG = "TelemetryManager";
+    public static final String LOG_DIR = "TelemetryLogs"; // Folder on Robot Controller
     private final Telemetry telemetry;
     private final LinkedHashMap<String, Object> dataPoints;
+    private final ElapsedTime logTimer = new ElapsedTime();
     private String logFileName = "telemetry_log.csv";
     private Writer fileWriter;
     private boolean loggingEnabled = false;
     private boolean firstLogWrite = true;
-    private final ElapsedTime logTimer = new ElapsedTime();
     private double logIntervalSeconds = 0.1; // Log data 10 times per second
-
-    public static final String TAG = "TelemetryManager";
-    public static final String LOG_DIR = "TelemetryLogs"; // Folder on Robot Controller
 
     public TelemetryManager(Telemetry telemetry, boolean enableLogging) {
         this.telemetry = telemetry;
@@ -95,7 +99,8 @@ public class TelemetryManager {
                     logLine.append(caption.replace(",", ";")).append(","); // Sanitize caption for CSV
                 }
             }
-            if (logLine.length() > 0) logLine.deleteCharAt(logLine.length() - 1); // Remove last comma
+            if (logLine.length() > 0)
+                logLine.deleteCharAt(logLine.length() - 1); // Remove last comma
             logLine.append("\n");
         }
 
@@ -109,8 +114,7 @@ public class TelemetryManager {
                 telemetry.addLine(String.valueOf(value));
             } else if (caption.isEmpty() && String.valueOf(value).isEmpty()) {
                 telemetry.addLine(""); // Empty line for spacing
-            }
-            else {
+            } else {
                 // Format for display (adjust field widths as needed)
                 String formattedValue;
                 if (value instanceof Double || value instanceof Float) {
@@ -135,7 +139,7 @@ public class TelemetryManager {
 
             try {
                 fileWriter.write(logLine.toString());
-                if(firstLogWrite) firstLogWrite = false; // Header written
+                if (firstLogWrite) firstLogWrite = false; // Header written
             } catch (IOException e) {
                 RobotLog.e(TAG, "Error writing to telemetry log: " + e.getMessage());
             }

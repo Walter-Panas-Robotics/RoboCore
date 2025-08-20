@@ -12,12 +12,12 @@ public class CommandArchitecture extends RoboCore {
 
     public static List<Command> update_commands = new ArrayList<>();
     private static volatile CommandArchitecture instance;
-    private static String name;
 
     private CommandArchitecture() {
 
     }
 
+    @SuppressWarnings("unused")
     public synchronized static CommandArchitecture getInstance() {
         if (instance == null) {
             instance = new CommandArchitecture();

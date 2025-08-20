@@ -13,12 +13,14 @@ import java.util.List;
 import RoboCore.RoboCore;
 import RoboCore.Robot;
 
+
+@SuppressWarnings("unused")
 public class GamepadManager extends RoboCore {
 
     private static final List<GamepadCommandEntry> gamepad_commands = new ArrayList<>();
-    private static GamepadManager instance;
     public static Gamepad gamepad1;
     public static Gamepad gamepad2;
+    private static GamepadManager instance;
 
     private GamepadManager(OpMode opMode) {
         new CommandArchitecture.Builder(this.getClass())
@@ -82,10 +84,15 @@ public class GamepadManager extends RoboCore {
 
     public static void assignCommand(boolean gamepad_button, String actionableMethod, @Nullable TriggerType triggerType) {
 
-        Method actionable_method = Robot.getMethodFromName(Robot.class, actionableMethod);
+        Method actionable_method;
+
+        try {
+            actionable_method = getMethodFromName(Robot.class, actionableMethod);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("Actionable method not found: " + actionableMethod, e);
+        }
 
         gamepad_commands.add(new GamepadCommandEntry(gamepad_button, actionable_method, triggerType));
-
     }
 
     public static void assignCommand(boolean gamepad_button, String actionableMethod) {

@@ -9,6 +9,7 @@ import java.util.List;
 
 import RoboCore.Robot;
 
+@SuppressWarnings("unused")
 public class AprilTagController {
 
     private static final AprilTagProcessor aprilTagProcessor = new AprilTagProcessor.Builder()

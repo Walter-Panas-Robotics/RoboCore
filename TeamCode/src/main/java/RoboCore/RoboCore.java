@@ -2,10 +2,17 @@ package RoboCore;
 
 import androidx.annotation.NonNull;
 
+import java.lang.reflect.Method;
+
 /**
  * The type Robo core.
  */
+@SuppressWarnings("unused")
 public class RoboCore {
+
+    public static Method getMethodFromName(Class<?> classInstance, String actionableMethod) throws NoSuchMethodException {
+        return classInstance.getMethod(actionableMethod);
+    }
 
     /**
      * Convert to mm double.
@@ -27,6 +34,8 @@ public class RoboCore {
         }
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    // Intentional inversion as I want it to be true if the object exists (not null).
     public static boolean exists(Object x) {
         return x != null;
     }
@@ -34,7 +43,7 @@ public class RoboCore {
     /**
      * The enum Holonomic motor locations.
      */
-    public enum MotorLocation { FRONT_LEFT, FRONT_RIGHT, BACK_LEFT, BACK_RIGHT, LEFT, RIGHT, FL_SWERVE, FR_SWERVE, BL_SWERVE, BR_SWERVE }
+    public enum MotorLocation {FRONT_LEFT, FRONT_RIGHT, BACK_LEFT, BACK_RIGHT, LEFT, RIGHT, FL_SWERVE, FR_SWERVE, BL_SWERVE, BR_SWERVE}
 
     /**
      * The enum Command type.
@@ -47,7 +56,8 @@ public class RoboCore {
         /**
          * Action command type.
          */
-        ACTION}
+        ACTION
+    }
 
     /**
      * The enum Measurement unit.
@@ -64,7 +74,8 @@ public class RoboCore {
         /**
          * Centimeter measurement unit.
          */
-        CM}
+        CM
+    }
 
     public enum CommandPriority {
         HIGHEST,
@@ -79,5 +90,38 @@ public class RoboCore {
         ON_RELEASE,
         ON_HOLD,
         SWITCH
+    }
+
+    public enum MathConstants {
+        ;
+
+        double ZERO() {
+            return 0;
+        }
+
+        double TWOSQRT2() {
+            return 2 * Math.sqrt(2);
+        }
+
+        double SQRT2() {
+            return Math.sqrt(2);
+        }
+
+        double PI() {
+            return 3.141592653589793;
+        }
+
+        double E() {
+            return 2.718281828459045;
+        }
+    }
+
+    public enum DirectionalVector {
+        FORWARD,
+        BACKWARD,
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN,
     }
 }
