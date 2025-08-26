@@ -14,5 +14,6 @@ dependencies {
     implementation 'org.firstinspires.ftc:Vision:10.3.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.6'
+    implementation project(':RoboCore')
 }
 

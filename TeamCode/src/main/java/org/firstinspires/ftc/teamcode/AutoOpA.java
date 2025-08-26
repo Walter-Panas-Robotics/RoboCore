@@ -11,11 +11,8 @@ import com.panther_tech.RoboCore.RoboCore;
 @Autonomous
 public class AutoOpA extends RoboCoreLinearOpMode implements MecanumDrivetrain {
 
-    @SuppressWarnings("all")
-    private Robot robot;
-
     @Override
-    public void init() {
+    public void init_robot() {
         robot = new Robot.Builder(this)
                 .build();
     }

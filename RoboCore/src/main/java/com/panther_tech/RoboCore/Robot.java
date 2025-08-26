@@ -2,6 +2,7 @@ package com.panther_tech.RoboCore;
 
 import androidx.annotation.NonNull;
 
+import com.panther_tech.RoboCore.Drivetrains.Drivetrain;
 import com.panther_tech.RoboCore.Exceptions.DrivetrainNotFound;
 import com.panther_tech.RoboCore.Exceptions.MotorNotFound;
 import com.panther_tech.RoboCore.Managers.CommandArchitecture;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import com.panther_tech.RoboCore.Drivetrains.Drivetrain;
 import lombok.Getter;
 
 
@@ -97,7 +97,7 @@ public class Robot extends RoboCore {
         drivetrain.init(this);
     }
 
-    public static synchronized Robot buildInstance(Builder builder) {
+    protected static synchronized Robot buildInstance(Builder builder) {
         if (instance == null) {
             if (builder == null) {
                 throw new IllegalStateException("Robot.Builder cannot be null for initial instantiation.");
@@ -115,17 +115,21 @@ public class Robot extends RoboCore {
     }
 
     public void update() {
-        drivetrain.drive(this, internalMotors);
-        if (CommandArchitecture.update_commands != null) {
-            for (CommandArchitecture.Command command : CommandArchitecture.update_commands) {
-                if (command.type == CommandType.UPDATE) {
-                    try {
-                        command.method.invoke(command.builder);
-                    } catch (Exception e) {
-                        telemetry.addLine("Error updating command: " + command.name);
+        if (!isAutonomous) {
+            drivetrain.drive(this, internalMotors);
+            if (CommandArchitecture.update_commands != null) {
+                for (CommandArchitecture.Command command : CommandArchitecture.update_commands) {
+                    if (command.type == CommandType.UPDATE) {
+                        try {
+                            command.method.invoke(command.builder);
+                        } catch (Exception e) {
+                            telemetry.addLine("Error updating command: " + command.name);
+                        }
                     }
                 }
             }
+        } else {
+            telemetry.addLine("[RoboCore.Robot] <WARNING>: RoboCore is running in autonomous mode. All calls for the update() and tick() methods will be ignored.");
         }
         telemetry.update();
     }

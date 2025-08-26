@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.internal.opmode.TelemetryInternal;
 import org.firstinspires.ftc.robotcore.internal.system.Assert;
 
+import com.panther_tech.RoboCore.Robot;
+
 /**
  * Base class for user defined linear operation modes (linear OpModes).
  * <p>
@@ -22,6 +24,9 @@ public abstract class RoboCoreLinearOpMode extends OpMode {
     private final Object runningNotifier = new Object();
     private volatile boolean userMethodReturned = false;
     private volatile boolean userMonitoredForStart = false;
+
+    public Robot robot;
+
 
 
     //------------------------------------------------------------------------------------------------
@@ -56,7 +61,7 @@ public abstract class RoboCoreLinearOpMode extends OpMode {
      * gets interrupted, which typically indicates that the OpMode has been stopped).
      */
     public void waitForStart() {
-        while (!isStarted()) {
+        while (!isStarted() && robot == null) {
             synchronized (runningNotifier) {
                 try {
                     runningNotifier.wait();
@@ -172,6 +177,11 @@ public abstract class RoboCoreLinearOpMode extends OpMode {
         return this.stopRequested || Thread.currentThread().isInterrupted();
     }
 
+    protected abstract void init_robot();
+
+    @Override
+    final public void init() {}
+
     /**
      * This method may not be overridden by linear OpModes
      */
@@ -214,11 +224,14 @@ public abstract class RoboCoreLinearOpMode extends OpMode {
         userMethodReturned = false;
         userMonitoredForStart = false;
 
+        init_robot();
         while (!isStarted && !stopRequested) {
             sleep(1);
         }
-        if (isStarted) {
+        if (isStarted && robot != null) {
             runOpMode();
+        } else {
+            throw new IllegalStateException("The variable: robot, cannot be equal to null. Please call init_robot() and use the Robot Builder to set it. EX: public void init_robot() { robot = new Robot.Builder(this).build(); }");
         }
         userMethodReturned = true;
         RobotLog.d("User runOpModeMethod exited");
