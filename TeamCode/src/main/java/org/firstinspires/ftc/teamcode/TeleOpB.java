@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.RoboCoreOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -11,12 +11,11 @@ import com.panther_tech.RoboCore.Robot;
 
 @TeleOp(name = "TeleOpB", group = "TeleOp")
 @SuppressWarnings("unused")
-public class TeleOpB extends OpMode implements MecanumDrivetrain {
+public class TeleOpB extends RoboCoreOpMode implements MecanumDrivetrain {
 
     Robot robot;
 
-    @Override
-    public void init() {
+    public void init_robot() {
         robot = new Robot.Builder(this)
                 .addMotor(  // Sets a custom name for the motor if you wanted to call it from another class.
                         RoboCore.MotorLocation.FRONT_LEFT, // Set motor location.
@@ -32,12 +31,7 @@ public class TeleOpB extends OpMode implements MecanumDrivetrain {
         telemetry.addData("Status", "Initialized");
     }
 
-    @Override
-    public void loop() {
-        robot.tick();
-        robot.getMotor("motor1");
-        telemetry.addData("Status", "Running");
-    }
+    public void loop() {}
 
     public void a_function() {
 

@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import lombok.Getter;
 
-
 /**
  * Main class for the robot.
  *
@@ -36,6 +35,7 @@ import lombok.Getter;
 @Getter
 public class Robot extends RoboCore {
     private static volatile Robot instance;
+
     private static double lastUpdateTime = 0;
 
     static {
@@ -116,6 +116,7 @@ public class Robot extends RoboCore {
 
     public void update() {
         if (!isAutonomous) {
+            RealtimeAnalyzer.setTick();
             drivetrain.drive(this, internalMotors);
             if (CommandArchitecture.update_commands != null) {
                 for (CommandArchitecture.Command command : CommandArchitecture.update_commands) {
@@ -128,6 +129,7 @@ public class Robot extends RoboCore {
                     }
                 }
             }
+            RealtimeAnalyzer.clearTick();
         } else {
             telemetry.addLine("[RoboCore.Robot] <WARNING>: RoboCore is running in autonomous mode. All calls for the update() and tick() methods will be ignored.");
         }
