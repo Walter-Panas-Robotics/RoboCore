@@ -26,6 +26,7 @@ public class TeleOpB extends OpMode implements MecanumDrivetrain {
                                 .runMode(DcMotor.RunMode.RUN_USING_ENCODER)
                                 .build())
                 .addGamepadCommand(gamepad1.a, "a_function", RoboCore.TriggerType.SWITCH)
+                .setWheelProperties(4, 537.7, RoboCore.MeasurementUnit.IN)
                 .build();
 
         telemetry.addData("Status", "Initialized");
@@ -34,7 +35,7 @@ public class TeleOpB extends OpMode implements MecanumDrivetrain {
     @Override
     public void loop() {
         robot.tick();
-        robot.getMotor("motor1").setPower(gamepad1.left_stick_y);
+        robot.getMotor("motor1");
         telemetry.addData("Status", "Running");
     }
 

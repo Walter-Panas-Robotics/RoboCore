@@ -1,10 +1,8 @@
 package RoboCore;
 
-import static RoboCore.Config.RoboCore.author;
-import static RoboCore.Config.RoboCore.version;
-
 import androidx.annotation.NonNull;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
@@ -13,8 +11,11 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import RoboCore.Drivetrains.Drivetrain;
 import RoboCore.Exceptions.DrivetrainNotFound;
@@ -25,18 +26,38 @@ import RoboCore.Managers.GamepadManager;
 import RoboCore.Managers.IMUManager;
 import lombok.Getter;
 
-@SuppressWarnings("unused")
+
+/**
+ * Main class for the robot.
+ *
+ * @author Nick Persaud
+ * @see Robot.Builder
+ */
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 @Getter
 public class Robot extends RoboCore {
     private static volatile Robot instance;
     private static double lastUpdateTime = 0;
-    private final Map<String, HardwareDevice> hardwareDevices = new HashMap<>();
-    private final Map<String, DcMotorEx> motors = new HashMap<>();
-    private final Map<MotorLocation, DcMotorEx> internalMotors = new HashMap<>();
     private final double maxSpeed;
+    static {
+        Properties properties = new Properties();
+        try {
+            properties.load(Robot.class.getResourceAsStream("/RoboCore.properties"));
+            version = Double.parseDouble(properties.getProperty("version"));
+            author = properties.getProperty("author");
+            team = properties.getProperty("team");
+        } catch (IOException e) {
+            System.err.println("Error loading RoboCore properties file. Currently not critical.");
+        }
+    }
+
+    private final double wheelDiameter;
     private final double controllerDeadzone;
     private final boolean fieldCentric;
-    private final double wheelDiameter;
+    private final double ticksPerRevolution;
+    private final boolean isAutonomous;
+    private final Map<String, HardwareDevice> hardwareDevices = new HashMap<>();
+    private final Map<String, DcMotorEx> motors = new HashMap<>();
     private final IMUManager imuManager;
     private final GamepadManager gamepadManager;
     private final Drivetrain drivetrain;
@@ -44,12 +65,14 @@ public class Robot extends RoboCore {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final IMU imu;
+    private final Map<MotorLocation, DcMotorEx> internalMotors = new HashMap<>();
 
     private Robot(Builder builder) {
         this.opMode = builder.opMode;
         this.telemetry = opMode.telemetry;
         this.hardwareMap = opMode.hardwareMap;
         this.wheelDiameter = builder.wheelDiameter;
+        this.ticksPerRevolution = builder.ticksPerRevolution;
         this.drivetrain = builder.drivetrain;
         this.imuManager = builder.imuManager;
         this.imu = builder.imu;
@@ -60,6 +83,16 @@ public class Robot extends RoboCore {
 
         this.internalMotors.putAll(builder.internalMotors);
         this.hardwareDevices.putAll(builder.hardwareDevices);
+
+        boolean TEMP_isAutonomous = false;
+        for (Annotation annotation : opMode.getClass().getAnnotations()) {
+            if (annotation.annotationType().equals(Autonomous.class)) {
+                TEMP_isAutonomous = true;
+                break;
+            }
+        }
+
+        this.isAutonomous = TEMP_isAutonomous;
 
         drivetrain.init(this);
     }
@@ -116,6 +149,7 @@ public class Robot extends RoboCore {
         return motor;
     }
 
+    @SuppressWarnings("unused")
     public static class Builder {
         @NonNull
         private final OpMode opMode;
@@ -129,6 +163,7 @@ public class Robot extends RoboCore {
         private double maxSpeed = 100;
         private double controllerDeadzone = 0.1;
         private boolean useFieldCentric = false;
+        private double ticksPerRevolution;
 
         public Builder(@NonNull OpMode opMode) {
             if (!(opMode instanceof Drivetrain)) {
@@ -159,8 +194,15 @@ public class Robot extends RoboCore {
             return this;
         }
 
-        public Builder setWheelDiameter(double diameter, MeasurementUnit unit) {
+        /**
+         * Always use TICKS PER WHEEL REVOLUTION -- NOT ROTOR REVOLUTION.
+         *
+         * @param diameter           The diameter of the wheel in inches.
+         * @param ticksPerRevolution The number of ticks of the motor per revolution of the wheel.
+         */
+        public Builder setWheelProperties(double diameter, double ticksPerRevolution, MeasurementUnit unit) {
             this.wheelDiameter = convertToMM(diameter, unit);
+            this.ticksPerRevolution = ticksPerRevolution;
             return this;
         }
 

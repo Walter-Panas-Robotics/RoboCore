@@ -2,6 +2,8 @@ package RoboCore;
 
 import androidx.annotation.NonNull;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import java.lang.reflect.Method;
 
 /**
@@ -9,6 +11,15 @@ import java.lang.reflect.Method;
  */
 @SuppressWarnings("unused")
 public class RoboCore {
+    public static double version;
+    public static String author;
+    public static String team;
+
+    public static DcMotor.RunMode autonomousRunMode = DcMotor.RunMode.RUN_TO_POSITION;
+    public static DcMotor.RunMode teleopRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
+
+    public static boolean AUTO_CONFIG_MOTORS = true;
+
 
     public static Method getMethodFromName(Class<?> classInstance, String actionableMethod) throws NoSuchMethodException {
         return classInstance.getMethod(actionableMethod);
@@ -21,7 +32,7 @@ public class RoboCore {
      * @param unit  the unit
      * @return Millimeter value
      */
-    static double convertToMM(double value, @NonNull MeasurementUnit unit) {
+    public static double convertToMM(double value, @NonNull MeasurementUnit unit) {
         switch (unit) {
             case IN:
                 return value * 25.4;
@@ -66,15 +77,63 @@ public class RoboCore {
         /**
          * Inches measurement unit.
          */
-        IN,
+        IN {
+            @Override
+            public double convertToMM(double value) {
+                return value * 25.4;
+            }
+
+            @Override
+            public double convertToMotorTicks(double value) {
+
+                double wheelDiameter = Robot.getInstance().getWheelDiameter();
+                double ticksPerRevolution = Robot.getInstance().getTicksPerRevolution();
+
+                return wheelDiameter != 0 && ticksPerRevolution != 0 ? convertToMM(value) / (wheelDiameter * Math.PI) * ticksPerRevolution : 0;
+            }
+        },
+
         /**
          * Millimeter measurement unit.
          */
-        MM,
+        MM {
+            @Override
+            public double convertToMM(double value) {
+                return value;
+            }
+
+            @Override
+            public double convertToMotorTicks(double value) {
+
+                double wheelDiameter = Robot.getInstance().getWheelDiameter();
+                double ticksPerRevolution = Robot.getInstance().getTicksPerRevolution();
+
+                return wheelDiameter != 0 && ticksPerRevolution != 0 ? convertToMM(value) / (wheelDiameter * Math.PI) * ticksPerRevolution : 0;
+            }
+        },
+
         /**
          * Centimeter measurement unit.
          */
-        CM
+        CM {
+            @Override
+            public double convertToMM(double value) {
+                return value * 10;
+            }
+
+            @Override
+            public double convertToMotorTicks(double value) {
+
+                double wheelDiameter = Robot.getInstance().getWheelDiameter();
+                double ticksPerRevolution = Robot.getInstance().getTicksPerRevolution();
+
+                return wheelDiameter != 0 && ticksPerRevolution != 0 ? convertToMM(value) / (wheelDiameter * Math.PI) * ticksPerRevolution : 0;
+            }
+        };
+
+        protected abstract double convertToMM(double value);
+
+        public abstract double convertToMotorTicks(double value);
     }
 
     public enum CommandPriority {

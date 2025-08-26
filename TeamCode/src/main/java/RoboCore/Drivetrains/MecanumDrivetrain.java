@@ -1,7 +1,6 @@
 package RoboCore.Drivetrains;
 
 import static RoboCore.Managers.GamepadManager.gamepad1;
-import static RoboCore.RoboCore.DirectionalVector;
 import static RoboCore.RoboCore.MotorLocation;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import RoboCore.Managers.IMUManager;
+import RoboCore.RoboCore;
 import RoboCore.Robot;
 
 public interface MecanumDrivetrain extends Drivetrain {
@@ -74,9 +74,54 @@ public interface MecanumDrivetrain extends Drivetrain {
 
     }
 
-    default void move(DirectionalVector direction, double distance, double speed) {
+    default void move(double distance, double speed, double angle, RoboCore.RoboCore.MeasurementUnit unit) {
+        int convertedDistance = (int) unit.convertToMotorTicks(distance);
+        double convertedAngle = Math.toRadians(angle);
+
+        DcMotorEx front_left_motor = Objects.requireNonNull(
+                motors.get(MotorLocation.FRONT_LEFT),
+                "Front Left motor (FRONT_LEFT) is missing from the motors map."
+        );
+        DcMotorEx back_left_motor = Objects.requireNonNull(
+                motors.get(MotorLocation.BACK_LEFT),
+                "Back Left motor (BACK_LEFT) is missing from the motors map."
+        );
+        DcMotorEx front_right_motor = Objects.requireNonNull(
+                motors.get(MotorLocation.FRONT_RIGHT),
+                "Front Right motor (FRONT_RIGHT) is missing from the motors map."
+        );
+        DcMotorEx back_right_motor = Objects.requireNonNull(
+                motors.get(MotorLocation.BACK_RIGHT),
+                "Back Right motor (BACK_RIGHT) is missing from the motors map."
+        );
+
+        front_left_motor.setTargetPosition(convertedDistance);
+        back_left_motor.setTargetPosition(convertedDistance);
+        front_right_motor.setTargetPosition(convertedDistance);
+        back_right_motor.setTargetPosition(convertedDistance);
+
+        
     }
 
     default void turn(double angle, double speed) {
+    }
+
+    @Override
+    default void init(Robot robot) {
+        Drivetrain.motors.putAll(robot.getInternalMotors());
+
+        if (robot.isAutonomous()) {
+            motors.forEach((location, motor) -> {
+                motor.setMode(RoboCore.autonomousRunMode);
+            });
+        } else {
+            motors.forEach((location, motor) -> {
+                motor.setMode(RoboCore.teleopRunMode);
+            });
+        }
+
+        if (motors.size() != 4) {
+            throw new IllegalArgumentException("Mecanum Drivetrain must have 4 motors.");
+        }
     }
 }

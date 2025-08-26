@@ -15,11 +15,22 @@ public interface Drivetrain {
 
     /**
      * Initialize the drivetrain. Sets the motor map within the drivetrain.
+     * If in Autonomous mode, sets the motor mode to RUN_TO_POSITION by default. Otherwise, sets it to RUN_USING_ENCODER.
+     * Can be overridden if needed.
      *
      * @param robot The robot to initialize the drivetrain with. (Uses "this" keyword)
+     * @see RoboCore
      */
     default void init(Robot robot) {
         Drivetrain.motors.putAll(robot.getInternalMotors());
+
+        if (RoboCore.AUTO_CONFIG_MOTORS) {
+            if (robot.isAutonomous()) {
+                motors.forEach((location, motor) -> motor.setMode(RoboCore.autonomousRunMode));
+            } else {
+                motors.forEach((location, motor) -> motor.setMode(RoboCore.teleopRunMode));
+            }
+        }
     }
 
     /**
@@ -36,11 +47,12 @@ public interface Drivetrain {
      * Only supports the directional vectors of:
      * FORWARD, BACKWARD, LEFT, and RIGHT.
      *
-     * @param direction The direction to move the robot
+     * @param unit      The unit to move the robot
      * @param distance  The distance to move the robot
      * @param speed     The speed to move the robot
+     * @param angle     The angle to move the robot in degrees.
      */
-    void move(RoboCore.DirectionalVector direction, double distance, double speed);
+    void move(double distance, double speed, double angle, RoboCore.RoboCore.MeasurementUnit unit);
 
     /**
      * Turn the robot in a specific direction with a given angle and speed;
