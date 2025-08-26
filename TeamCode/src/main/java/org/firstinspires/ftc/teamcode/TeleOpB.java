@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import RoboCore.Builders.Motors.MotorBuilder;
-import RoboCore.Drivetrains.MecanumDrivetrain;
-import RoboCore.RoboCore;
-import RoboCore.Robot;
+import com.panther_tech.RoboCore.Builders.Motors.MotorBuilder;
+import com.panther_tech.RoboCore.Drivetrains.MecanumDrivetrain;
+import com.panther_tech.RoboCore.RoboCore;
+import com.panther_tech.RoboCore.Robot;
 
 @TeleOp(name = "TeleOpB", group = "TeleOp")
 @SuppressWarnings("unused")
