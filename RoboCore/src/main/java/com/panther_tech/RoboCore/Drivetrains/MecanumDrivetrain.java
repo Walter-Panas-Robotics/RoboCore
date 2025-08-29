@@ -34,7 +34,7 @@ public interface MecanumDrivetrain extends Drivetrain {
         );
 
         double x = gamepad1.left_stick_x;
-        double y = -gamepad1.left_stick_y;
+        double y = gamepad1.left_stick_y;
         double rx = gamepad1.right_stick_x;
 
         double robot_angle = IMUManager.X;

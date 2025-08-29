@@ -9,9 +9,14 @@ import java.util.Map;
 import com.panther_tech.RoboCore.RoboCore;
 import com.panther_tech.RoboCore.Robot;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @SuppressWarnings("unused")
 public interface Drivetrain {
     Map<RoboCore.MotorLocation, DcMotorEx> motors = new HashMap<>();
+
+    RoboCore.DrivetrainType drivetrainType = null;
 
     /**
      * Initialize the drivetrain. Sets the motor map within the drivetrain.

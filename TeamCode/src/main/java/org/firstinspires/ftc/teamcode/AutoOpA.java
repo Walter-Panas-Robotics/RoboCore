@@ -8,7 +8,7 @@ import com.panther_tech.RoboCore.Robot;
 import com.panther_tech.RoboCore.RoboCore;
 
 /** @noinspection unused*/
-@Autonomous
+@Autonomous(name = "AutoOpA", group = "Auto", preselectTeleOp = "TeleOpB")
 public class AutoOpA extends RoboCoreLinearOpMode implements MecanumDrivetrain {
 
     @Override

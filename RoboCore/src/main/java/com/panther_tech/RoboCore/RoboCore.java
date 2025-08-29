@@ -20,6 +20,13 @@ public class RoboCore {
 
     public static boolean AUTO_CONFIG_MOTORS = true;
 
+    public enum DrivetrainType {
+        MECANUM,
+        TANK,
+        SWERVE,
+        OTHER
+    }
+
 
     public static Method getMethodFromName(Class<?> classInstance, String actionableMethod) throws NoSuchMethodException {
         return classInstance.getMethod(actionableMethod);
@@ -139,6 +146,7 @@ public class RoboCore {
     public enum CommandPriority {
         HIGHEST,
         HIGH,
+        NORMAL,
         MEDIUM,
         LOW,
         EXPENDABLE

@@ -2,10 +2,12 @@ package com.panther_tech.RoboCore;
 
 import androidx.annotation.NonNull;
 
+import com.panther_tech.RoboCore.CommandArchitecture.ActionableMethod;
+import com.panther_tech.RoboCore.CommandArchitecture.CommandHandler;
 import com.panther_tech.RoboCore.Drivetrains.Drivetrain;
+import com.panther_tech.RoboCore.Drivetrains.MecanumDrivetrain;
 import com.panther_tech.RoboCore.Exceptions.DrivetrainNotFound;
 import com.panther_tech.RoboCore.Exceptions.MotorNotFound;
-import com.panther_tech.RoboCore.Managers.CommandArchitecture;
 import com.panther_tech.RoboCore.Managers.GamepadManager;
 import com.panther_tech.RoboCore.Managers.IMUManager;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -21,9 +23,11 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Main class for the robot.
@@ -50,16 +54,18 @@ public class Robot extends RoboCore {
         }
     }
 
-    private final double maxSpeed;
+    @Setter
+    private double maxSpeed;
+
     private final double wheelDiameter;
     private final double controllerDeadzone;
     private final boolean fieldCentric;
     private final double ticksPerRevolution;
     private final boolean isAutonomous;
+    private final boolean autoConfigure;
     private final Map<String, HardwareDevice> hardwareDevices = new HashMap<>();
     private final Map<String, DcMotorEx> motors = new HashMap<>();
     private final IMUManager imuManager;
-    private final GamepadManager gamepadManager;
     private final Drivetrain drivetrain;
     private final OpMode opMode;
     private final HardwareMap hardwareMap;
@@ -79,7 +85,7 @@ public class Robot extends RoboCore {
         this.maxSpeed = builder.maxSpeed;
         this.controllerDeadzone = builder.controllerDeadzone;
         this.fieldCentric = builder.useFieldCentric;
-        this.gamepadManager = GamepadManager.getInstance(this.opMode);
+        this.autoConfigure = builder.autoConfigure;
 
         this.internalMotors.putAll(builder.internalMotors);
         this.hardwareDevices.putAll(builder.hardwareDevices);
@@ -91,10 +97,36 @@ public class Robot extends RoboCore {
                 break;
             }
         }
-
         this.isAutonomous = TEMP_isAutonomous;
 
+        if (autoConfigure) {
+            if (drivetrain instanceof MecanumDrivetrain) {
+                auto_config(DrivetrainType.MECANUM);
+            }
+        }
+
+
         drivetrain.init(this);
+    }
+
+    /** @noinspection SameParameterValue, SwitchStatementWithTooFewBranches */
+    private void auto_config(DrivetrainType type) {
+        switch (type) {
+            case MECANUM:
+                for (MotorLocation location : MotorLocation.values()) {
+                    if (location == MotorLocation.FRONT_LEFT) {
+                        Objects.requireNonNull(internalMotors.get(location)).setDirection(DcMotorEx.Direction.REVERSE);
+                    } else if (location == MotorLocation.BACK_LEFT) {
+                        Objects.requireNonNull(internalMotors.get(location)).setDirection(DcMotorEx.Direction.REVERSE);
+                    } else {
+                        Objects.requireNonNull(internalMotors.get(location)).setDirection(DcMotorEx.Direction.FORWARD);
+                    }
+                }
+                break;
+            default:
+                telemetry.addLine("Unsupported drivetrain type for auto configuration: " + type);
+                break;
+        }
     }
 
     protected static synchronized Robot buildInstance(Builder builder) {
@@ -118,17 +150,7 @@ public class Robot extends RoboCore {
         if (!isAutonomous) {
             RealtimeAnalyzer.setTick();
             drivetrain.drive(this, internalMotors);
-            if (CommandArchitecture.update_commands != null) {
-                for (CommandArchitecture.Command command : CommandArchitecture.update_commands) {
-                    if (command.type == CommandType.UPDATE) {
-                        try {
-                            command.method.invoke(command.builder);
-                        } catch (Exception e) {
-                            telemetry.addLine("Error updating command: " + command.name);
-                        }
-                    }
-                }
-            }
+            CommandHandler.poll();
             RealtimeAnalyzer.clearTick();
         } else {
             telemetry.addLine("[RoboCore.Robot] <WARNING>: RoboCore is running in autonomous mode. All calls for the update() and tick() methods will be ignored.");
@@ -170,6 +192,7 @@ public class Robot extends RoboCore {
         private double controllerDeadzone = 0.1;
         private boolean useFieldCentric = false;
         private double ticksPerRevolution;
+        private boolean autoConfigure = false;
 
         public Builder(@NonNull OpMode opMode) {
             if (!(opMode instanceof Drivetrain)) {
@@ -182,7 +205,7 @@ public class Robot extends RoboCore {
             opMode.telemetry.update();
         }
 
-        public Builder addMotor(String customName, MotorLocation location, DcMotorEx motor) {
+        public Builder addMotor(String customName, MotorLocation location, @NonNull DcMotorEx motor) {
             internalMotors.put(location, motor);
             hardwareDevices.put(customName, motor);
             opMode.telemetry.addLine("Added motor: " + customName);
@@ -232,9 +255,18 @@ public class Robot extends RoboCore {
             return this;
         }
 
-        public Builder addGamepadCommand(boolean button, String method) {
-            GamepadManager.assignCommand(button, method);
+        public Builder addGamepadCommand(boolean button, ActionableMethod method, TriggerType triggerType) {
+            GamepadManager.assignCommand(button, method, triggerType);
             return this;
+        }
+
+        public Builder autoConfigure(boolean autoConfigure) {
+            this.autoConfigure = autoConfigure;
+            return this;
+        }
+
+        public Builder autoConfigure() {
+            return autoConfigure(true);
         }
 
         public Robot build() {

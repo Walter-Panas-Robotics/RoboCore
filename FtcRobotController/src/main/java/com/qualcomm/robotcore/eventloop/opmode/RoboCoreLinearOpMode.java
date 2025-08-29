@@ -278,6 +278,8 @@ public abstract class RoboCoreLinearOpMode extends OpMode {
         // executorService being null would indicate that this method was called on an OpMode that had not yet been initialized
         Assert.assertTrue(executorService != null);
 
+        blackboard.put("robot", robot);
+
         // For LinearOpMode, the OpMode thread needs to be interrupted, as the user may have called a
         // long-running method that can only be stopped early by interrupting the thread.
         executorService.shutdownNow();
