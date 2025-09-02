@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import com.panther_tech.RoboCore.CommandArchitecture.ActionableMethod;
 import com.panther_tech.RoboCore.CommandArchitecture.CommandHandler;
 import com.panther_tech.RoboCore.Drivetrains.Drivetrain;
-import com.panther_tech.RoboCore.Drivetrains.MecanumDrivetrain;
+import com.panther_tech.RoboCore.Drivetrains.Subsystems.MecanumDrivetrain;
 import com.panther_tech.RoboCore.Exceptions.DrivetrainNotFound;
 import com.panther_tech.RoboCore.Exceptions.MotorNotFound;
 import com.panther_tech.RoboCore.Managers.GamepadManager;

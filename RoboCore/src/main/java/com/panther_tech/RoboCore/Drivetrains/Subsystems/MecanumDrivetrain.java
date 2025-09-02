@@ -1,8 +1,10 @@
-package com.panther_tech.RoboCore.Drivetrains;
+package com.panther_tech.RoboCore.Drivetrains.Subsystems;
 
 import static com.panther_tech.RoboCore.Managers.GamepadManager.gamepad1;
 import static com.panther_tech.RoboCore.RoboCore.MotorLocation;
 
+import com.panther_tech.RoboCore.Drivetrains.AutonomousDrivetrain;
+import com.panther_tech.RoboCore.Drivetrains.Drivetrain;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.Map;
@@ -12,7 +14,14 @@ import com.panther_tech.RoboCore.Managers.IMUManager;
 import com.panther_tech.RoboCore.RoboCore;
 import com.panther_tech.RoboCore.Robot;
 
-public interface MecanumDrivetrain extends Drivetrain {
+public interface MecanumDrivetrain extends Drivetrain, AutonomousDrivetrain {
+
+    @Override
+    default void init(Robot robot) {
+        if (motors.size() != 4) {
+            throw new IllegalArgumentException("Mecanum Drivetrain must have 4 motors.");
+        }
+    }
 
     default void drive(Robot robot, Map<MotorLocation, DcMotorEx> motors) {
 
@@ -101,24 +110,9 @@ public interface MecanumDrivetrain extends Drivetrain {
         front_right_motor.setTargetPosition(convertedDistance);
         back_right_motor.setTargetPosition(convertedDistance);
 
-        
+
     }
 
     default void turn(double angle, double speed) {
-    }
-
-    @Override
-    default void init(Robot robot) {
-        Drivetrain.motors.putAll(robot.getInternalMotors());
-
-        if (robot.isAutonomous()) {
-            motors.forEach((location, motor) -> motor.setMode(RoboCore.autonomousRunMode));
-        } else {
-            motors.forEach((location, motor) -> motor.setMode(RoboCore.teleopRunMode));
-        }
-
-        if (motors.size() != 4) {
-            throw new IllegalArgumentException("Mecanum Drivetrain must have 4 motors.");
-        }
     }
 }

@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.panther_tech.RoboCore.Builders.Motors.MotorBuilder;
-import com.panther_tech.RoboCore.Drivetrains.MecanumDrivetrain;
+import com.panther_tech.RoboCore.Drivetrains.Subsystems.MecanumDrivetrain;
 import com.panther_tech.RoboCore.RoboCore;
 import com.panther_tech.RoboCore.Robot;
 
