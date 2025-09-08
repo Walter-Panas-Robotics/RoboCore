@@ -72,6 +72,9 @@ public class Robot extends RoboCore {
     private final Telemetry telemetry;
     private final IMU imu;
     private final Map<MotorLocation, DcMotorEx> internalMotors = new HashMap<>();
+    private boolean useFieldCentric;
+    private final boolean useAprilTags;
+    private final boolean useLiveView;
 
     private Robot(Builder builder) {
         this.opMode = builder.opMode;
@@ -86,6 +89,8 @@ public class Robot extends RoboCore {
         this.controllerDeadzone = builder.controllerDeadzone;
         this.fieldCentric = builder.useFieldCentric;
         this.autoConfigure = builder.autoConfigure;
+        this.useAprilTags = builder.useAprilTags;
+        this.useLiveView = builder.useLiveView;
 
         this.internalMotors.putAll(builder.internalMotors);
         this.hardwareDevices.putAll(builder.hardwareDevices);
@@ -193,6 +198,8 @@ public class Robot extends RoboCore {
         private boolean useFieldCentric = false;
         private double ticksPerRevolution;
         private boolean autoConfigure = false;
+        private boolean useAprilTags = false;
+        private boolean useLiveView = false;
 
         public Builder(@NonNull OpMode opMode) {
             if (!(opMode instanceof Drivetrain)) {
@@ -260,6 +267,14 @@ public class Robot extends RoboCore {
             return this;
         }
 
+        public Builder useAprilTags(boolean useAprilTags) {
+            this.useAprilTags = useAprilTags;
+            return this;
+        }
+        public Builder useAprilTags() {
+            return useAprilTags(true);
+        }
+
         public Builder autoConfigure(boolean autoConfigure) {
             this.autoConfigure = autoConfigure;
             return this;
@@ -267,6 +282,13 @@ public class Robot extends RoboCore {
 
         public Builder autoConfigure() {
             return autoConfigure(true);
+        }
+        public Builder useLiveView(boolean useLiveView) {
+            this.useLiveView = useLiveView;
+            return this;
+        }
+        public Builder useLiveView() {
+            return useLiveView(true);
         }
 
         public Robot build() {
